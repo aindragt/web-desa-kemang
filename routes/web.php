@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\BeritaController;
 use App\Http\Controllers\Public\LayananController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Operator\OperatorDashboardController;
 use Inertia\Inertia;
 
 /*
@@ -61,10 +63,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard Admin
-    Route::get('/', function () {
-        return Inertia::render('Admin/Dashboard');
-    })->name('dashboard');
+    // Dashboard Admin (Menggunakan __invoke controller)
+    Route::get('/', AdminDashboardController::class)->name('dashboard');
 
     // Validasi Surat (Setujui / Tolak / Kembalikan)
     Route::prefix('validasi')->name('validasi.')->group(function () {
@@ -158,10 +158,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:operator'])->prefix('operator')->name('operator.')->group(function () {
-    // Dashboard Operator
-    Route::get('/', function () {
-        return Inertia::render('Operator/Dashboard');
-    })->name('dashboard');
+    // Dashboard Operator (Menggunakan __invoke controller)
+    Route::get('/', OperatorDashboardController::class)->name('dashboard');
 
     // Kelola Berita (CRUD + Multiple Photos)
     Route::prefix('berita')->name('berita.')->group(function () {
