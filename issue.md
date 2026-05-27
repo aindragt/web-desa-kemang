@@ -1,31 +1,29 @@
-# Issue: Pembuatan Seeders Data Awal (User, Statistik, dan Berita)
+# Issue: Implementasi Sistem Autentikasi 2 Role (Session-Based Auth)
 
 ## Deskripsi
-Implementasi class database seeders untuk mengisi data awal ke dalam database E-Gov Desa Kemang. Ini mencakup pembuatan user default (1 Admin, 1 Operator), data statistik awal (penduduk, pekerjaan, agama, pendidikan) untuk chart animasi, dan artikel berita dummy.
+Implementasi modul autentikasi lengkap dengan 1 halaman login bersama untuk 2 role (`admin` dan `operator`), controller otorisasi session, redirect otomatis pasca-login, serta proteksi route group menggunakan custom middleware.
 
 ## Rencana Pekerjaan
 
-### 1. Inisialisasi Database Seeders
-- **`UserSeeder`**:
-  - Membuat 1 akun **Admin (Kepala Desa)**:
-    - Nama: `H. Ahmad Faisal`
-    - Username: `admin_kemang`
-    - Password: `password123` (di-hash)
-    - Role: `admin`
-  - Membuat 1 akun **Operator (Staf Desa)**:
-    - Nama: `Siti Rahayu`
-    - Username: `operator_kemang`
-    - Password: `password123` (di-hash)
-    - Role: `operator`
-- **`StatistikSeeder`**:
-  - Memasukkan data awal kependudukan Desa Kemang:
-    - Kategori **Pendidikan**: SD, SMP, SMA, Diploma/Sarjana.
-    - Kategori **Pekerjaan**: Petani/Pekebun, Buruh Harian, Wiraswasta, PNS/TNI/Polri.
-    - Kategori **Agama**: Islam, Kristen Protestan, Katolik, Budha.
-- **`BeritaSeeder`**:
-  - Membuat 3-4 artikel berita dummy lengkap dengan kategori (Pemerintahan, Kegiatan Desa, Pengumuman) dan status published agar langsung tampil di beranda utama.
-- **`PengaturanSeeder`** (Tambahan):
-  - Mengisi default key-value settings seperti `nama_kepala_desa` dan `nip_kepala_desa` untuk kebutuhan kop surat digital.
+### 1. Pembuatan AuthController
+- **`AuthController`**:
+  - `showLogin()`: Merender halaman login menggunakan Inertia.js.
+  - `login()`: Validasi kredensial `username` & `password`. Cek status keaktifan user (`is_active`). Memulai session, dan melakukan redirect otomatis sesuai role (admin -> `/admin`, operator -> `/operator`).
+  - `logout()`: Menghancurkan session user dan redirect ke `/login`.
 
-### 2. Integrasi ke `DatabaseSeeder`
-- Memanggil `UserSeeder`, `StatistikSeeder`, `BeritaSeeder`, dan `PengaturanSeeder` di dalam method `run()` pada class `DatabaseSeeder` utama.
+### 2. Implementasi Middleware & Proteksi Route
+- **`EnsureRole` (Custom Middleware)**:
+  - Cek apakah user sudah login. Jika belum, redirect ke `/login`.
+  - Membatasi akses route berdasarkan parameter role (contoh: `role:admin` atau `role:operator`).
+  - Jika role tidak sesuai, mengembalikan response 403 Forbidden.
+
+### 3. Pembuatan Halaman Login UI
+- **`resources/js/Pages/Auth/Login.vue`**:
+  - Form login responsif dengan framework Vue 3 + Inertia `useForm`.
+  - Integrasi style premium Tailwind CSS 4 dengan warna aksen songket Melayu Riau (Hijau Hutan, Emas, Krem, Coklat).
+
+### 4. Konfigurasi Routes (`routes/web.php`)
+- Route `/login` (GET/POST) dan `/logout` (POST).
+- Group `/admin` dengan middleware `EnsureRole:admin`.
+- Group `/operator` dengan middleware `EnsureRole:operator`.
+- Halaman placeholder dashboard admin & operator untuk memverifikasi fungsionalitas.
