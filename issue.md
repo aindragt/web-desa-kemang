@@ -1,41 +1,47 @@
-# Issue: Setup Awal Project - Laravel 13 + Vue 3 + Inertia.js + Tailwind CSS 4 + Vite
+# Issue: Pembuatan Model Eloquent Lengkap & Relasi Database
 
 ## Deskripsi
-Melakukan inisialisasi dan konfigurasi awal project E-Government Desa Kemang dengan stack modern:
-- Backend: Laravel 13 (PHP 8.3+)
-- Frontend: Vue 3 + Inertia.js (SPA)
-- Styling: Tailwind CSS 4
-- Bundler: Vite
+Implementasi ORM Eloquent Models di Laravel 13 untuk memetakan seluruh tabel database Desa Kemang. Setiap Model akan dilengkapi konfigurasi strict, relasi, cast tipe data, mutator/accessor, dan dynamic local scopes untuk mempermudah operasional data.
 
-## Pekerjaan Yang Telah Dilakukan
+## Rencana Pekerjaan
 
-### 1. Inisialisasi Project Laravel
-- Mengunduh dan memasang kerangka kerja Laravel 11/13.
-- Mengonfigurasi `bootstrap/app.php` dengan menambahkan global middleware `HandleInertiaRequests` pada stack routing `web`.
-- Menghapus welcome default blade view (`welcome.blade.php`).
+### 1. Refaktor & Setup Model `User`
+- Menghapus konfigurasi default email.
+- Menambahkan `$fillable` (`nama`, `username`, `password`, `role`, `is_active`, `last_login_at`).
+- Menambahkan `$hidden` (`password`, `remember_token`).
+- Menambahkan `$casts` (`is_active` => boolean, `last_login_at` => datetime, `password` => hashed).
+- Mendefinisikan relasi `hasMany` ke `PengajuanSurat` (`disetujuiSurat()`).
+- Menambahkan custom scope `scopeActive` dan `scopeRole`.
 
-### 2. Instalasi Packages & Dependencies
-- **Composer (Server-side):**
-  - `inertiajs/inertia-laravel` (v3.1.0)
-- **NPM (Client-side):**
-  - `@inertiajs/vue3`
-  - `vue`
-  - `@vitejs/plugin-vue`
-  - `@tailwindcss/vite`
-  - `tailwindcss` (v4)
+### 2. Implementasi Model Berita & Foto (`Berita`, `FotoBerita`)
+- **`Berita`**:
+  - `$fillable` (`judul`, `slug`, `kategori`, `ringkasan`, `isi`, `penulis`, `is_published`, `published_at`).
+  - `$casts` (`is_published` => boolean, `published_at` => datetime).
+  - Relasi `hasMany` ke `FotoBerita` (`fotos()`).
+  - Scope `scopePublished` dan `scopeByCategory`.
+  - Mutator otomatis untuk auto-generating slug dari judul.
+- **`FotoBerita`**:
+  - `$fillable` (`berita_id`, `foto`, `keterangan`, `urutan`).
+  - Relasi `belongsTo` ke `Berita` (`berita()`).
+  - Scope `scopeOrdered` (urut berdasarkan kolom `urutan` secara ascending).
+  - Accessor path absolut untuk file storage gambar.
 
-### 3. Konfigurasi Client & Server-side
-- **Vite (`vite.config.js`):** Mengonfigurasi engine bundler agar menggunakan plugin `@tailwindcss/vite` dan `@vitejs/plugin-vue` serta mengatur alias `@` ke `/resources/js`.
-- **Inertia Layout (`resources/views/app.blade.php`):** Membuat root layout HTML5, memuat font (Playfair Display, Lora, Inter), dan memanggil directive `@inertia` dan `@inertiaHead`.
-- **Inertia Client-side Setup (`resources/js/app.js`):** Menginisialisasi aplikasi Vue 3 dengan `createInertiaApp` dan dynamic resolver untuk folder `Pages`.
-- **Tailwind CSS 4 (`resources/css/app.css`):** Menggunakan sintaksis `@import "tailwindcss"` baru serta mendefinisikan `@theme` palette warna sesuai PRD (Hijau Hutan, Emas, Krem, Coklat Tua, Putih Gading).
+### 3. Implementasi Model Statistik (`Statistik`)
+- `$fillable` (`kategori`, `label`, `nilai`, `satuan`, `urutan`).
+- `$casts` (`nilai` => float/decimal).
+- Scope `scopeByCategory` dan `scopeOrdered`.
 
-### 4. Struktur Folder & Halaman Uji Coba
-- Membuat direktori frontend di bawah `resources/js/`:
-  - `Pages/Public`, `Pages/Admin`, `Pages/Operator`, `Pages/Auth`
-  - `Components/UI`, `Components/Public`, `Components/Dashboard`
-  - `Layouts`
-  - `Composables`
-- Membuat halaman pengujian [Welcome.vue](file:///c:/laragon/www/web-kemang/resources/js/Pages/Welcome.vue) untuk memverifikasi fungsionalitas rendering Vue, Inertia, dan Tailwind CSS 4 theme settings.
-- Memperbarui file `routes/web.php` untuk merender halaman `Welcome` dengan custom message props.
-- Memvalidasi kompilasi aset production dengan `npm run build` yang sukses tanpa kendala.
+### 4. Implementasi Model Pengajuan Surat (`PengajuanSurat`)
+- `$fillable` lengkap untuk biodata warga, data SKU (`nama_usaha`, `jenis_usaha`), status (`status`, `catatan_admin`), dan tracking approval (`diproses_at`, `disetujui_at`, `disetujui_oleh`, `selesai_at`).
+- `$casts` (`tanggal_lahir` => date, `diproses_at`/`disetujui_at`/`selesai_at` => datetime).
+- Relasi `belongsTo` ke `User` (`validator()`) via foreign key `disetujui_oleh`.
+- Scopes: `scopePending`, `scopeInProcess`, `scopeApproved`, `scopeRejected`, `scopeFinished`, `scopeByReference`.
+
+### 5. Fitur Penunjang (`PesanKontak`, `Pengaturan`)
+- **`PesanKontak`**:
+  - `$fillable` (`nama`, `kontak`, `pesan`, `is_read`).
+  - `$casts` (`is_read` => boolean).
+  - Scope `scopeUnread` dan `scopeRead`.
+- **`Pengaturan`**:
+  - `$fillable` (`kunci`, `nilai`).
+  - Static helper untuk mengambil value setting berdasarkan key (`Pengaturan::getValue($key)`).
