@@ -7,6 +7,7 @@ use App\Http\Controllers\Public\BeritaController;
 use App\Http\Controllers\Public\LayananController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Operator\OperatorDashboardController;
+use App\Http\Controllers\Operator\OperatorBeritaController;
 use Inertia\Inertia;
 
 /*
@@ -63,7 +64,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard Admin (Menggunakan __invoke controller)
+    // Dashboard Admin
     Route::get('/', AdminDashboardController::class)->name('dashboard');
 
     // Validasi Surat (Setujui / Tolak / Kembalikan)
@@ -158,34 +159,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:operator'])->prefix('operator')->name('operator.')->group(function () {
-    // Dashboard Operator (Menggunakan __invoke controller)
+    // Dashboard Operator
     Route::get('/', OperatorDashboardController::class)->name('dashboard');
 
     // Kelola Berita (CRUD + Multiple Photos)
     Route::prefix('berita')->name('berita.')->group(function () {
-        Route::get('/', function () {
-            return Inertia::render('Operator/Berita/Index');
-        })->name('index');
+        Route::get('/', [OperatorBeritaController::class, 'index'])->name('index');
+        Route::get('/tambah', [OperatorBeritaController::class, 'create'])->name('create');
+        Route::post('/', [OperatorBeritaController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [OperatorBeritaController::class, 'edit'])->name('edit');
+        Route::post('/{id}', [OperatorBeritaController::class, 'update'])->name('update');
+        Route::delete('/{id}', [OperatorBeritaController::class, 'destroy'])->name('destroy');
         
-        Route::get('/tambah', function () {
-            return Inertia::render('Operator/Berita/Create');
-        })->name('create');
-        
-        Route::post('/', function () {
-            return redirect()->route('operator.berita.index')->with('success', 'Berita berhasil diterbitkan.');
-        })->name('store');
-        
-        Route::get('/{id}/edit', function ($id) {
-            return Inertia::render('Operator/Berita/Edit', ['id' => $id]);
-        })->name('edit');
-        
-        Route::post('/{id}', function ($id) { // Menggunakan POST untuk multipart/form-data update
-            return redirect()->route('operator.berita.index')->with('success', 'Berita berhasil diperbarui.');
-        })->name('update');
-        
-        Route::delete('/{id}', function ($id) {
-            return back()->with('success', 'Berita berhasil dihapus.');
-        })->name('destroy');
+        // Aksi Tambahan: Toggle status publish & hapus foto gallery individual
+        Route::patch('/{id}/toggle-publish', [OperatorBeritaController::class, 'togglePublish'])->name('toggle-publish');
+        Route::delete('/foto/{fotoId}', [OperatorBeritaController::class, 'hapusFoto'])->name('foto.destroy');
     });
 
     // Kelola Statistik
