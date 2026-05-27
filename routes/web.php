@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\BeritaController;
+use App\Http\Controllers\Public\LayananController;
 use Inertia\Inertia;
 
 /*
@@ -11,57 +14,33 @@ use Inertia\Inertia;
 */
 
 // Beranda
-Route::get('/', function () {
-    return Inertia::render('Public/Beranda');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Profil Desa
-Route::get('/profil', function () {
-    return Inertia::render('Public/Profil');
-})->name('profil');
+Route::get('/profil', [HomeController::class, 'profil'])->name('profil');
 
 // Statistik Desa
-Route::get('/statistik', function () {
-    return Inertia::render('Public/Statistik');
-})->name('statistik');
+Route::get('/statistik', [HomeController::class, 'statistik'])->name('statistik');
 
 // Berita Desa
 Route::prefix('berita')->name('berita.')->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Public/Berita/Index');
-    })->name('index');
-    
-    Route::get('/{slug}', function ($slug) {
-        return Inertia::render('Public/Berita/Show', ['slug' => $slug]);
-    })->name('show');
+    Route::get('/', [BeritaController::class, 'index'])->name('index');
+    Route::get('/{slug}', [BeritaController::class, 'show'])->name('show');
 });
 
 // Layanan Surat Online (E-Service)
 Route::prefix('layanan-surat')->name('layanan-surat.')->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Public/LayananSurat/Index');
-    })->name('index');
-    
-    Route::post('/', function () {
-        // Logika submit pengajuan surat
-        return back()->with('success', 'Pengajuan surat berhasil dikirim.');
-    })->name('store');
-    
-    Route::get('/status', function () {
-        return Inertia::render('Public/LayananSurat/CekStatus');
-    })->name('status');
+    Route::get('/', [LayananController::class, 'index'])->name('index');
+    Route::get('/pengajuan/{jenis}', [LayananController::class, 'form'])->name('form');
+    Route::post('/pengajuan', [LayananController::class, 'submit'])->name('submit');
+    Route::get('/status', [LayananController::class, 'cekStatus'])->name('status');
+    Route::get('/{ref}/slip', [LayananController::class, 'downloadUlang'])->name('slip');
 });
 
 // Kontak
 Route::prefix('kontak')->name('kontak.')->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Public/Kontak');
-    })->name('index');
-    
-    Route::post('/', function () {
-        // Logika kirim pesan kontak
-        return back()->with('success', 'Pesan Anda berhasil dikirim.');
-    })->name('store');
+    Route::get('/', [HomeController::class, 'kontak'])->name('index');
+    Route::post('/', [HomeController::class, 'kirimPesan'])->name('store');
 });
 
 /*

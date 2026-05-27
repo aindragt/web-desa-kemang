@@ -1,47 +1,25 @@
-# Issue: Pemetaan Lengkap Routing Web E-Gov Desa Kemang
+# Issue: Pembuatan Controller untuk Website Publik (Home, Berita, & Layanan)
 
 ## Deskripsi
-Implementasi seluruh web routing di `routes/web.php` untuk mendukung seluruh fitur E-Government Desa Kemang sesuai dengan daftar spesifikasi fungsionalitas PRD. Ini mencakup route publik untuk warga (tanpa login), route admin (Kepala Desa) terproteksi, dan route operator (Staf Desa) terproteksi.
+Implementasi controller utama di bawah namespace `Public` untuk melayani seluruh halaman frontend publik (tanpa login). Controller ini bertugas mengambil data dari database (statistik, berita, pengaturan) dan merendernya ke view Vue via Inertia.js.
 
 ## Rencana Pekerjaan
 
-### 1. Route Publik (Warga - Tanpa Login)
-- **Beranda**: `/` (GET)
-- **Profil Desa**: `/profil` (GET)
-- **Statistik Desa**: `/statistik` (GET)
-- **Berita Desa**:
-  - List berita: `/berita` (GET)
-  - Detail berita: `/berita/{slug}` (GET)
-- **Layanan Surat Online**:
-  - Landing / Form Pengajuan: `/layanan-surat` (GET)
-  - Submit Pengajuan: `/layanan-surat` (POST)
-  - Cek Status Surat: `/layanan-surat/status` (GET)
-- **Kontak**:
-  - Info Kontak: `/kontak` (GET)
-  - Kirim Pesan: `/kontak` (POST)
+### 1. Inisialisasi Controllers
+- **`HomeController`**:
+  - `index()`: Mengambil berita terbaru (limit 3), data statistik ringkas (total penduduk, pekerjaan, dll), dan pengaturan kop desa untuk ditampilkan di halaman Beranda.
+  - `profil()`: Merender halaman profil desa (sejarah, visi misi, wilayah, aparatur).
+  - `statistik()`: Mengambil seluruh data dari model `Statistik` untuk dikirimkan ke visualisasi chart animasi.
+  - `kontak()`: Merender halaman kontak desa beserta data kantor pelayanan.
+  - `kirimPesan()`: Validasi data form kontak warga dan menyimpannya ke tabel `pesan_kontak`.
 
-### 2. Route Admin (Kepala Desa)
-- Prefix: `/admin`, Middleware: `['auth', 'role:admin']`
-- **Dashboard**: `/admin` (GET)
-- **Validasi Surat**:
-  - List surat masuk: `/admin/validasi` (GET)
-  - Detail validasi: `/admin/validasi/{id}` (GET)
-  - Aksi validasi (Setujui/Tolak/Kembalikan): `/admin/validasi/{id}` (PUT/PATCH)
-- **Pengaturan Kop & TTD**: `/admin/pengaturan` (GET/POST)
-- **Kelola Statistik**: `/admin/statistik` (Resource Route - CRUD)
-- **Kelola Akun Operator**: `/admin/operator` (Resource Route - CRUD + Toggle status keaktifan)
+- **`BeritaController`**:
+  - `index()`: Mengambil list berita terbit (`is_published = true`) dengan pagination, filter kategori, dan pencarian judul.
+  - `show()`: Mengambil detail berita beserta relasi multiple `fotos` pendukung.
 
-### 3. Route Operator (Staf Desa)
-- Prefix: `/operator`, Middleware: `['auth', 'role:operator']`
-- **Dashboard**: `/operator` (GET)
-- **Kelola Berita**: `/operator/berita` (Resource Route - CRUD + kelola multiple foto)
-- **Kelola Statistik**: `/operator/statistik` (Resource Route - CRUD)
-- **Proses Surat**:
-  - List pengajuan & tracking: `/operator/surat` (GET)
-  - Detail pengajuan: `/operator/surat/{id}` (GET)
-  - Update status proses: `/operator/surat/{id}/status` (PATCH)
-  - Cetak surat (Print layout): `/operator/surat/{id}/cetak` (GET - Hanya aktif jika disetujui)
-- **Kelola Pesan Kontak**:
-  - List & baca pesan: `/operator/pesan` (GET)
-  - Detail pesan: `/operator/pesan/{id}` (GET)
-  - Hapus / update read status: `/operator/pesan/{id}` (DELETE/PATCH)
+- **`LayananController`**:
+  - `index()`: Merender list menu pelayanan 4 jenis surat.
+  - `form()`: Menampilkan formulir input spesifik jenis surat (SKD, SKU, SKM, SPK).
+  - `submit()`: Validasi form, generate nomor referensi otomatis (format: PREFIX-TAHUN-URUTAN), dan simpan ke database dengan status awal `menunggu`.
+  - `cekStatus()`: Mencari status surat berdasarkan nomor referensi dan mengirimkan data timeline status ke Vue.
+  - `downloadUlang()`: Fitur tambahan jika warga kehilangan tracking atau perlu mengunduh ulang informasi referensi pengajuan.
