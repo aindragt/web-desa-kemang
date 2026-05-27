@@ -1,29 +1,47 @@
-# Issue: Implementasi Sistem Autentikasi 2 Role (Session-Based Auth)
+# Issue: Pemetaan Lengkap Routing Web E-Gov Desa Kemang
 
 ## Deskripsi
-Implementasi modul autentikasi lengkap dengan 1 halaman login bersama untuk 2 role (`admin` dan `operator`), controller otorisasi session, redirect otomatis pasca-login, serta proteksi route group menggunakan custom middleware.
+Implementasi seluruh web routing di `routes/web.php` untuk mendukung seluruh fitur E-Government Desa Kemang sesuai dengan daftar spesifikasi fungsionalitas PRD. Ini mencakup route publik untuk warga (tanpa login), route admin (Kepala Desa) terproteksi, dan route operator (Staf Desa) terproteksi.
 
 ## Rencana Pekerjaan
 
-### 1. Pembuatan AuthController
-- **`AuthController`**:
-  - `showLogin()`: Merender halaman login menggunakan Inertia.js.
-  - `login()`: Validasi kredensial `username` & `password`. Cek status keaktifan user (`is_active`). Memulai session, dan melakukan redirect otomatis sesuai role (admin -> `/admin`, operator -> `/operator`).
-  - `logout()`: Menghancurkan session user dan redirect ke `/login`.
+### 1. Route Publik (Warga - Tanpa Login)
+- **Beranda**: `/` (GET)
+- **Profil Desa**: `/profil` (GET)
+- **Statistik Desa**: `/statistik` (GET)
+- **Berita Desa**:
+  - List berita: `/berita` (GET)
+  - Detail berita: `/berita/{slug}` (GET)
+- **Layanan Surat Online**:
+  - Landing / Form Pengajuan: `/layanan-surat` (GET)
+  - Submit Pengajuan: `/layanan-surat` (POST)
+  - Cek Status Surat: `/layanan-surat/status` (GET)
+- **Kontak**:
+  - Info Kontak: `/kontak` (GET)
+  - Kirim Pesan: `/kontak` (POST)
 
-### 2. Implementasi Middleware & Proteksi Route
-- **`EnsureRole` (Custom Middleware)**:
-  - Cek apakah user sudah login. Jika belum, redirect ke `/login`.
-  - Membatasi akses route berdasarkan parameter role (contoh: `role:admin` atau `role:operator`).
-  - Jika role tidak sesuai, mengembalikan response 403 Forbidden.
+### 2. Route Admin (Kepala Desa)
+- Prefix: `/admin`, Middleware: `['auth', 'role:admin']`
+- **Dashboard**: `/admin` (GET)
+- **Validasi Surat**:
+  - List surat masuk: `/admin/validasi` (GET)
+  - Detail validasi: `/admin/validasi/{id}` (GET)
+  - Aksi validasi (Setujui/Tolak/Kembalikan): `/admin/validasi/{id}` (PUT/PATCH)
+- **Pengaturan Kop & TTD**: `/admin/pengaturan` (GET/POST)
+- **Kelola Statistik**: `/admin/statistik` (Resource Route - CRUD)
+- **Kelola Akun Operator**: `/admin/operator` (Resource Route - CRUD + Toggle status keaktifan)
 
-### 3. Pembuatan Halaman Login UI
-- **`resources/js/Pages/Auth/Login.vue`**:
-  - Form login responsif dengan framework Vue 3 + Inertia `useForm`.
-  - Integrasi style premium Tailwind CSS 4 dengan warna aksen songket Melayu Riau (Hijau Hutan, Emas, Krem, Coklat).
-
-### 4. Konfigurasi Routes (`routes/web.php`)
-- Route `/login` (GET/POST) dan `/logout` (POST).
-- Group `/admin` dengan middleware `EnsureRole:admin`.
-- Group `/operator` dengan middleware `EnsureRole:operator`.
-- Halaman placeholder dashboard admin & operator untuk memverifikasi fungsionalitas.
+### 3. Route Operator (Staf Desa)
+- Prefix: `/operator`, Middleware: `['auth', 'role:operator']`
+- **Dashboard**: `/operator` (GET)
+- **Kelola Berita**: `/operator/berita` (Resource Route - CRUD + kelola multiple foto)
+- **Kelola Statistik**: `/operator/statistik` (Resource Route - CRUD)
+- **Proses Surat**:
+  - List pengajuan & tracking: `/operator/surat` (GET)
+  - Detail pengajuan: `/operator/surat/{id}` (GET)
+  - Update status proses: `/operator/surat/{id}/status` (PATCH)
+  - Cetak surat (Print layout): `/operator/surat/{id}/cetak` (GET - Hanya aktif jika disetujui)
+- **Kelola Pesan Kontak**:
+  - List & baca pesan: `/operator/pesan` (GET)
+  - Detail pesan: `/operator/pesan/{id}` (GET)
+  - Hapus / update read status: `/operator/pesan/{id}` (DELETE/PATCH)
