@@ -1,25 +1,24 @@
-# Issue: Pembuatan Controller untuk Website Publik (Home, Berita, & Layanan)
+# Issue: Pembuatan Controller Dashboard Admin & Operator
 
 ## Deskripsi
-Implementasi controller utama di bawah namespace `Public` untuk melayani seluruh halaman frontend publik (tanpa login). Controller ini bertugas mengambil data dari database (statistik, berita, pengaturan) dan merendernya ke view Vue via Inertia.js.
+Implementasi `AdminDashboardController` dan `OperatorDashboardController` untuk melayani panel dashboard internal masing-masing role. Controller ini akan mengumpulkan metrik statistik operasional desa, log audit, dan memuat status kelengkapan data administratif.
 
 ## Rencana Pekerjaan
 
-### 1. Inisialisasi Controllers
-- **`HomeController`**:
-  - `index()`: Mengambil berita terbaru (limit 3), data statistik ringkas (total penduduk, pekerjaan, dll), dan pengaturan kop desa untuk ditampilkan di halaman Beranda.
-  - `profil()`: Merender halaman profil desa (sejarah, visi misi, wilayah, aparatur).
-  - `statistik()`: Mengambil seluruh data dari model `Statistik` untuk dikirimkan ke visualisasi chart animasi.
-  - `kontak()`: Merender halaman kontak desa beserta data kantor pelayanan.
-  - `kirimPesan()`: Validasi data form kontak warga dan menyimpannya ke tabel `pesan_kontak`.
+### 1. AdminDashboardController
+- Menerima request untuk dashboard utama Admin (Kepala Desa) terproteksi.
+- Mengirimkan data metrik:
+  - Jumlah pengajuan surat berstatus `menunggu_persetujuan` (menjadi antrean utama Kepala Desa).
+  - Daftar surat yang menunggu keputusan Kepala Desa (disertai biodata singkat pemohon).
+  - Riwayat validasi surat terbaru yang disetujui/ditolak oleh Kepala Desa tersebut (limit 5).
+  - Status kelengkapan upload stempel digital desa (`cap_desa`) dan tanda tangan transparan (`ttd_kepala_desa`) di tabel pengaturan.
 
-- **`BeritaController`**:
-  - `index()`: Mengambil list berita terbit (`is_published = true`) dengan pagination, filter kategori, dan pencarian judul.
-  - `show()`: Mengambil detail berita beserta relasi multiple `fotos` pendukung.
-
-- **`LayananController`**:
-  - `index()`: Merender list menu pelayanan 4 jenis surat.
-  - `form()`: Menampilkan formulir input spesifik jenis surat (SKD, SKU, SKM, SPK).
-  - `submit()`: Validasi form, generate nomor referensi otomatis (format: PREFIX-TAHUN-URUTAN), dan simpan ke database dengan status awal `menunggu`.
-  - `cekStatus()`: Mencari status surat berdasarkan nomor referensi dan mengirimkan data timeline status ke Vue.
-  - `downloadUlang()`: Fitur tambahan jika warga kehilangan tracking atau perlu mengunduh ulang informasi referensi pengajuan.
+### 2. OperatorDashboardController
+- Menerima request untuk dashboard utama Operator (Staf Desa) terproteksi.
+- Mengirimkan data metrik ringkasan:
+  - Jumlah total surat masuk berstatus `menunggu` dan `diproses`.
+  - Jumlah total artikel berita terpublikasi.
+  - Jumlah pesan masuk dari warga yang berstatus belum dibaca (`is_read = false`).
+  - Daftar 5 pengajuan surat terbaru untuk segera direspons.
+  - Daftar 5 berita terbaru yang diunggah staf.
+  - Daftar 5 pesan kontak warga terbaru yang masuk.
