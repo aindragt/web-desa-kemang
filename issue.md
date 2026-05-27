@@ -1,24 +1,22 @@
-# Issue: Pembuatan Controller Dashboard Admin & Operator
+# Issue: Pembuatan Controller Berita internal Operator (Multiple Foto Support)
 
 ## Deskripsi
-Implementasi `AdminDashboardController` dan `OperatorDashboardController` untuk melayani panel dashboard internal masing-masing role. Controller ini akan mengumpulkan metrik statistik operasional desa, log audit, dan memuat status kelengkapan data administratif.
+Implementasi `OperatorBeritaController` untuk memfasilitasi Staf Operator dalam mengelola portal informasi desa (CRUD lengkap). Controller ini akan dirancang tangguh untuk menangani file upload batch (multiple photos), penghapusan per-foto saat edit, sinkronisasi relasi database di tabel `foto_berita`, serta toggle rilis publikasi berita.
 
 ## Rencana Pekerjaan
 
-### 1. AdminDashboardController
-- Menerima request untuk dashboard utama Admin (Kepala Desa) terproteksi.
-- Mengirimkan data metrik:
-  - Jumlah pengajuan surat berstatus `menunggu_persetujuan` (menjadi antrean utama Kepala Desa).
-  - Daftar surat yang menunggu keputusan Kepala Desa (disertai biodata singkat pemohon).
-  - Riwayat validasi surat terbaru yang disetujui/ditolak oleh Kepala Desa tersebut (limit 5).
-  - Status kelengkapan upload stempel digital desa (`cap_desa`) dan tanda tangan transparan (`ttd_kepala_desa`) di tabel pengaturan.
-
-### 2. OperatorDashboardController
-- Menerima request untuk dashboard utama Operator (Staf Desa) terproteksi.
-- Mengirimkan data metrik ringkasan:
-  - Jumlah total surat masuk berstatus `menunggu` dan `diproses`.
-  - Jumlah total artikel berita terpublikasi.
-  - Jumlah pesan masuk dari warga yang berstatus belum dibaca (`is_read = false`).
-  - Daftar 5 pengajuan surat terbaru untuk segera direspons.
-  - Daftar 5 berita terbaru yang diunggah staf.
-  - Daftar 5 pesan kontak warga terbaru yang masuk.
+### 1. Inisialisasi OperatorBeritaController
+- **`index()`**: Menampilkan list seluruh berita yang dibuat (paginated), pencarian judul, dan kategori filter.
+- **`create()`**: Merender halaman formulir input berita baru.
+- **`store()`**:
+  - Validasi ketat (judul, kategori, ringkasan, isi, multiple photos format JPG/PNG/WEBP maks 2MB).
+  - Penyimpanan artikel berita (slug digenerate otomatis).
+  - Upload dan simpan batch gambar ke disk `public/berita/` serta catat relasi di tabel `foto_berita`.
+- **`edit()`**: Mengambil data artikel berita beserta list seluruh relasi `fotos` yang terikat.
+- **`update()`**:
+  - Validasi data artikel baru.
+  - Penambahan foto baru (jika ada) ke database.
+  - (Opsional/Pendukung): Mendukung payload handling multipart pada update state.
+- **`destroy()`**: Menghapus data berita, otomatis menghapus seluruh relasi file fisik foto di storage (menggunakan helper `Storage::delete`) dan data di DB (`onDelete('cascade')`).
+- **`togglePublish()`**: Aksi cepat mengubah status `is_published` berita (draft / publish) beserta pencatatan timestamp rilis.
+- **`hapusFoto()`**: Handler endpoint untuk menghapus foto tertentu secara asinkron saat proses edit berita berlangsung tanpa perlu menghapus keseluruhan draf artikel.
