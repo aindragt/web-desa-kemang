@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Lora', serif;
+  --font-display: 'Playfair Display', serif;
+  
+  --color-primary: #2D5016;
+  --color-accent: #C8952A;
+  --color-krem: #F5EDD8;
+  --color-coklat-tua: #2C1A0E;
+  --color-putih-gading: #FEFCF7;
+  --color-primary-hover: #4A7C2E;
+}
+
+/* Custom transitions and global resets if needed */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
