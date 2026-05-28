@@ -7,6 +7,7 @@ use App\Http\Controllers\Public\BeritaController;
 use App\Http\Controllers\Public\LayananController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPengaturanController;
+use App\Http\Controllers\Admin\AdminStatistikController;
 use App\Http\Controllers\Operator\OperatorDashboardController;
 use App\Http\Controllers\Operator\OperatorBeritaController;
 use Inertia\Inertia;
@@ -91,29 +92,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Kelola Statistik
     Route::prefix('statistik')->name('statistik.')->group(function () {
-        Route::get('/', function () {
-            return Inertia::render('Admin/Statistik/Index');
-        })->name('index');
-        
-        Route::get('/tambah', function () {
-            return Inertia::render('Admin/Statistik/Form');
-        })->name('create');
-        
-        Route::post('/', function () {
-            return redirect()->route('admin.statistik.index')->with('success', 'Data statistik berhasil ditambahkan.');
-        })->name('store');
-        
-        Route::get('/{id}/edit', function ($id) {
-            return Inertia::render('Admin/Statistik/Form', ['id' => $id]);
-        })->name('edit');
-        
-        Route::put('/{id}', function ($id) {
-            return redirect()->route('admin.statistik.index')->with('success', 'Data statistik berhasil diperbarui.');
-        })->name('update');
-        
-        Route::delete('/{id}', function ($id) {
-            return back()->with('success', 'Data statistik berhasil dihapus.');
-        })->name('destroy');
+        Route::get('/', [AdminStatistikController::class, 'index'])->name('index');
+        Route::post('/', [AdminStatistikController::class, 'store'])->name('store');
+        Route::put('/update-semua', [AdminStatistikController::class, 'updateSemua'])->name('update-semua');
+        Route::delete('/{id}', [AdminStatistikController::class, 'destroy'])->name('destroy');
     });
 
     // Kelola Akun Operator
@@ -174,25 +156,10 @@ Route::middleware(['auth', 'role:operator'])->prefix('operator')->name('operator
 
     // Kelola Statistik
     Route::prefix('statistik')->name('statistik.')->group(function () {
-        Route::get('/', function () {
-            return Inertia::render('Operator/Statistik/Index');
-        })->name('index');
-        
-        Route::get('/tambah', function () {
-            return Inertia::render('Operator/Statistik/Form');
-        })->name('create');
-        
-        Route::post('/', function () {
-            return redirect()->route('operator.statistik.index')->with('success', 'Statistik berhasil ditambahkan.');
-        })->name('store');
-        
-        Route::get('/{id}/edit', function ($id) {
-            return Inertia::render('Operator/Statistik/Form', ['id' => $id]);
-        })->name('edit');
-        
-        Route::put('/{id}', function ($id) {
-            return redirect()->route('operator.statistik.index')->with('success', 'Statistik berhasil diperbarui.');
-        })->name('update');
+        Route::get('/', [AdminStatistikController::class, 'index'])->name('index');
+        Route::post('/', [AdminStatistikController::class, 'store'])->name('store');
+        Route::put('/update-semua', [AdminStatistikController::class, 'updateSemua'])->name('update-semua');
+        Route::delete('/{id}', [AdminStatistikController::class, 'destroy'])->name('destroy');
     });
 
     // Proses Surat Warga (Ubah status & Cetak)
