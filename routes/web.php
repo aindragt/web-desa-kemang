@@ -6,6 +6,7 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\BeritaController;
 use App\Http\Controllers\Public\LayananController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminOperatorController;
 use App\Http\Controllers\Admin\AdminPengaturanController;
 use App\Http\Controllers\Admin\AdminStatistikController;
 use App\Http\Controllers\Operator\OperatorDashboardController;
@@ -100,34 +101,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Kelola Akun Operator
     Route::prefix('operator')->name('operator.')->group(function () {
-        Route::get('/', function () {
-            return Inertia::render('Admin/Operator/Index');
-        })->name('index');
-        
-        Route::get('/tambah', function () {
-            return Inertia::render('Admin/Operator/Form');
-        })->name('create');
-        
-        Route::post('/', function () {
-            return redirect()->route('admin.operator.index')->with('success', 'Akun operator berhasil dibuat.');
-        })->name('store');
-        
-        Route::get('/{id}/edit', function ($id) {
-            return Inertia::render('Admin/Operator/Form', ['id' => $id]);
-        })->name('edit');
-        
-        Route::put('/{id}', function ($id) {
-            return redirect()->route('admin.operator.index')->with('success', 'Akun operator berhasil diperbarui.');
-        })->name('update');
-        
-        Route::patch('/{id}/toggle', function ($id) {
-            // Logika aktif / nonaktifkan operator
-            return back()->with('success', 'Status operator berhasil diubah.');
-        })->name('toggle');
-        
-        Route::delete('/{id}', function ($id) {
-            return back()->with('success', 'Akun operator berhasil dihapus.');
-        })->name('destroy');
+        Route::get('/', [AdminOperatorController::class, 'index'])->name('index');
+        Route::post('/', [AdminOperatorController::class, 'store'])->name('store');
+        Route::patch('/{id}/toggle', [AdminOperatorController::class, 'toggleActive'])->name('toggle');
+        Route::put('/{id}/reset-password', [AdminOperatorController::class, 'resetPassword'])->name('reset-password');
+        Route::delete('/{id}', [AdminOperatorController::class, 'destroy'])->name('destroy');
     });
 });
 
