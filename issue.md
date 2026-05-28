@@ -1,41 +1,22 @@
-# Issue: Setup Awal Project - Laravel 13 + Vue 3 + Inertia.js + Tailwind CSS 4 + Vite
+# Issue: Fitur Pengaturan TTD Kepala Desa dan Cap Desa (Admin)
 
-## Deskripsi
-Melakukan inisialisasi dan konfigurasi awal project E-Government Desa Kemang dengan stack modern:
-- Backend: Laravel 13 (PHP 8.3+)
-- Frontend: Vue 3 + Inertia.js (SPA)
-- Styling: Tailwind CSS 4
-- Bundler: Vite
+## Deskripsi Masalah / Kebutuhan
+Admin (Kepala Desa) memerlukan sebuah modul Pengaturan untuk mengelola data identitas pejabat penandatangan dokumen dan elemen tanda tangan/stempel desa yang valid. Modul ini penting untuk memastikan validasi kebenaran dokumen yang dicetak oleh Operator.
 
-## Pekerjaan Yang Telah Dilakukan
+## Rencana Implementasi
 
-### 1. Inisialisasi Project Laravel
-- Mengunduh dan memasang kerangka kerja Laravel 11/13.
-- Mengonfigurasi `bootstrap/app.php` dengan menambahkan global middleware `HandleInertiaRequests` pada stack routing `web`.
-- Menghapus welcome default blade view (`welcome.blade.php`).
+1. **Model Pengaturan**
+   - Menambahkan helper static method `setValue(string $kunci, ?string $nilai)` untuk memudahkan penyimpanan data pengaturan secara dinamis dengan metode key-value.
 
-### 2. Instalasi Packages & Dependencies
-- **Composer (Server-side):**
-  - `inertiajs/inertia-laravel` (v3.1.0)
-- **NPM (Client-side):**
-  - `@inertiajs/vue3`
-  - `vue`
-  - `@vitejs/plugin-vue`
-  - `@tailwindcss/vite`
-  - `tailwindcss` (v4)
+2. **AdminPengaturanController**
+   - **`index`**: Mengambil nilai data pengaturan kades (`nama_kepala_desa`, `nip_kepala_desa`, `ttd_kepala_desa`, `cap_desa`) dengan path URL storage yang siap dipakai frontend Inertia.js.
+   - **`update`**: Validasi input (nama, NIP, upload berkas PNG max 2MB). Menyimpan data identitas kades serta memproses berkas TTD & Cap yang diunggah ke storage `public`. Secara otomatis menghapus berkas lama jika diganti untuk efisiensi ruang server.
+   - **`hapusFile`**: Menghapus tanda tangan digital atau cap desa secara fisik dari storage dan memperbarui databasenya kembali menjadi `null`.
 
-### 3. Konfigurasi Client & Server-side
-- **Vite (`vite.config.js`):** Mengonfigurasi engine bundler agar menggunakan plugin `@tailwindcss/vite` dan `@vitejs/plugin-vue` serta mengatur alias `@` ke `/resources/js`.
-- **Inertia Layout (`resources/views/app.blade.php`):** Membuat root layout HTML5, memuat font (Playfair Display, Lora, Inter), dan memanggil directive `@inertia` dan `@inertiaHead`.
-- **Inertia Client-side Setup (`resources/js/app.js`):** Menginisialisasi aplikasi Vue 3 dengan `createInertiaApp` dan dynamic resolver untuk folder `Pages`.
-- **Tailwind CSS 4 (`resources/css/app.css`):** Menggunakan sintaksis `@import "tailwindcss"` baru serta mendefinisikan `@theme` palette warna sesuai PRD (Hijau Hutan, Emas, Krem, Coklat Tua, Putih Gading).
+3. **Routing di `routes/web.php`**
+   - Menghubungkan route `/admin/pengaturan` ke `AdminPengaturanController`.
+   - Menyediakan route GET (`index`), POST (`update`), dan DELETE (`hapusFile`).
 
-### 4. Struktur Folder & Halaman Uji Coba
-- Membuat direktori frontend di bawah `resources/js/`:
-  - `Pages/Public`, `Pages/Admin`, `Pages/Operator`, `Pages/Auth`
-  - `Components/UI`, `Components/Public`, `Components/Dashboard`
-  - `Layouts`
-  - `Composables`
-- Membuat halaman pengujian [Welcome.vue](file:///c:/laragon/www/web-kemang/resources/js/Pages/Welcome.vue) untuk memverifikasi fungsionalitas rendering Vue, Inertia, dan Tailwind CSS 4 theme settings.
-- Memperbarui file `routes/web.php` untuk merender halaman `Welcome` dengan custom message props.
-- Memvalidasi kompilasi aset production dengan `npm run build` yang sukses tanpa kendala.
+## Hasil yang Diharapkan
+- Admin memiliki kendali penuh atas identitas Kepala Desa, TTD digital, serta stempel resmi desa.
+- Data ini tersimpan dengan aman pada database dan folder storage lokal secara rapi.
