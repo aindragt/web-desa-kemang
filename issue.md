@@ -1,22 +1,23 @@
-# Issue: Fitur Pengaturan TTD Kepala Desa dan Cap Desa (Admin)
+# Issue: Pembuatan Controller Pengelolaan Statistik Desa (Admin & Operator)
 
 ## Deskripsi Masalah / Kebutuhan
-Admin (Kepala Desa) memerlukan sebuah modul Pengaturan untuk mengelola data identitas pejabat penandatangan dokumen dan elemen tanda tangan/stempel desa yang valid. Modul ini penting untuk memastikan validasi kebenaran dokumen yang dicetak oleh Operator.
+Sistem E-Demografi & Statistik Desa Kemang membutuhkan modul manajemen statistik untuk mempermudah pembaruan data kependudukan (Pendidikan, Pekerjaan, Agama). Pembaruan data ini harus efisien sehingga mendukung penambahan data tunggal serta pengkinian massal (*bulk update*) secara bersamaan.
 
 ## Rencana Implementasi
 
-1. **Model Pengaturan**
-   - Menambahkan helper static method `setValue(string $kunci, ?string $nilai)` untuk memudahkan penyimpanan data pengaturan secara dinamis dengan metode key-value.
+1. **Membuat Shared/Base Controller**:
+   - Kita bisa membuat satu controller yang dapat digunakan bersama baik untuk Admin maupun Operator (misal: `App\Http\Controllers\Admin\AdminStatistikController` atau di namespace general yang dialias ke route masing-masing role). Namun agar modular dan terstruktur sesuai role-based routing sebelumnya, kita akan membuat controller tunggal yaitu `App\Http\Controllers\Admin\AdminStatistikController` untuk Admin dan memetakan route Operator ke sana (atau menggunakan namespace `App\Http\Controllers\General\StatistikController` agar bersih). 
+   - Mari kita buat `App\Http\Controllers\Admin\AdminStatistikController` sebagai modul utama yang meng-handle kelola data statistik (baik untuk admin maupun operator, karena secara data & logic CRUD statis ini identik untuk kedua role).
 
-2. **AdminPengaturanController**
-   - **`index`**: Mengambil nilai data pengaturan kades (`nama_kepala_desa`, `nip_kepala_desa`, `ttd_kepala_desa`, `cap_desa`) dengan path URL storage yang siap dipakai frontend Inertia.js.
-   - **`update`**: Validasi input (nama, NIP, upload berkas PNG max 2MB). Menyimpan data identitas kades serta memproses berkas TTD & Cap yang diunggah ke storage `public`. Secara otomatis menghapus berkas lama jika diganti untuk efisiensi ruang server.
-   - **`hapusFile`**: Menghapus tanda tangan digital atau cap desa secara fisik dari storage dan memperbarui databasenya kembali menjadi `null`.
+2. **Fungsionalitas Controller**:
+   - **`index`**: Mengambil seluruh data statistik, dikelompokkan berdasarkan field `kategori` (`pendidikan`, `pekerjaan`, `agama`), diurutkan berdasarkan `urutan` secara menanjak (ordered scope), lalu dirender via `Inertia::render()`.
+   - **`store`**: Menambahkan label/statistik tunggal baru untuk kategori tertentu dengan validasi lengkap (`kategori`, `label`, `nilai`, `satuan`, `urutan`).
+   - **`updateSemua` (Bulk Update)**: Menerima array berisikan data statistik untuk melakukan pembaruan nilai & urutan banyak data sekaligus secara cepat dan efisien.
+   - **`destroy`**: Menghapus data statistik tunggal berdasarkan ID.
 
-3. **Routing di `routes/web.php`**
-   - Menghubungkan route `/admin/pengaturan` ke `AdminPengaturanController`.
-   - Menyediakan route GET (`index`), POST (`update`), dan DELETE (`hapusFile`).
+3. **Routing (`routes/web.php`)**:
+   - Menghubungkan route kelola statistik baik pada prefix `admin/statistik` maupun `operator/statistik` ke controller baru tersebut.
 
 ## Hasil yang Diharapkan
-- Admin memiliki kendali penuh atas identitas Kepala Desa, TTD digital, serta stempel resmi desa.
-- Data ini tersimpan dengan aman pada database dan folder storage lokal secara rapi.
+- Pengelolaan statistik desa (Pendidikan, Pekerjaan, Agama) dapat diakses dengan cepat.
+- Operator dan Admin dapat memperbarui semua data dalam kategori secara massal (*bulk*) sekali klik.
