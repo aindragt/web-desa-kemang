@@ -22,4 +22,15 @@ class Pengaturan extends Model
         
         return $setting ? $setting->nilai : $default;
     }
+
+    /**
+     * Helper static method to set/update a setting value.
+     */
+    public static function setValue(string $key, ?string $value): void
+    {
+        self::updateOrCreate(
+            ['kunci' => $key],
+            ['nilai' => $value]
+        );
+    }
 }

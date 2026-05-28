@@ -6,6 +6,7 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\BeritaController;
 use App\Http\Controllers\Public\LayananController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminPengaturanController;
 use App\Http\Controllers\Operator\OperatorDashboardController;
 use App\Http\Controllers\Operator\OperatorBeritaController;
 use Inertia\Inertia;
@@ -84,14 +85,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     });
 
     // Pengaturan TTD & Cap
-    Route::get('/pengaturan', function () {
-        return Inertia::render('Admin/Pengaturan');
-    })->name('pengaturan');
-    
-    Route::post('/pengaturan', function () {
-        // Logika update pengaturan TTD / Cap
-        return back()->with('success', 'Pengaturan berhasil diperbarui.');
-    })->name('pengaturan.update');
+    Route::get('/pengaturan', [AdminPengaturanController::class, 'index'])->name('pengaturan');
+    Route::post('/pengaturan', [AdminPengaturanController::class, 'update'])->name('pengaturan.update');
+    Route::delete('/pengaturan/file/{kunci}', [AdminPengaturanController::class, 'hapusFile'])->name('pengaturan.file.destroy');
 
     // Kelola Statistik
     Route::prefix('statistik')->name('statistik.')->group(function () {
