@@ -1,22 +1,18 @@
-# Issue: Fitur Pengaturan TTD Kepala Desa dan Cap Desa (Admin)
+# Issue: Pembuatan OperatorPesanController (Kelola & Baca Pesan Kontak)
 
 ## Deskripsi Masalah / Kebutuhan
-Admin (Kepala Desa) memerlukan sebuah modul Pengaturan untuk mengelola data identitas pejabat penandatangan dokumen dan elemen tanda tangan/stempel desa yang valid. Modul ini penting untuk memastikan validasi kebenaran dokumen yang dicetak oleh Operator.
+Operator (staf desa) memerlukan modul kelola pesan masuk dari warga untuk melihat daftar aspirasi/kontak, membaca detail pesan, serta menghapus pesan yang tidak relevan atau bersifat spam. Sistem harus secara otomatis menandai pesan sebagai terbaca (`is_read = true`) ketika operator membuka rincian pesan tersebut.
 
 ## Rencana Implementasi
 
-1. **Model Pengaturan**
-   - Menambahkan helper static method `setValue(string $kunci, ?string $nilai)` untuk memudahkan penyimpanan data pengaturan secara dinamis dengan metode key-value.
+1. **Membuat OperatorPesanController**:
+   - **`index`**: Menampilkan semua daftar pesan kontak masuk (paginated) diurutkan berdasarkan tanggal terbaru. Dilengkapi dengan filter pencarian dan filter status pesan (`sudah dibaca`/`belum dibaca`).
+   - **`show`**: Menampilkan rincian pesan. Ketika dibuka, sistem secara otomatis merubah status pesan `is_read = true` jika sebelumnya berstatus belum dibaca.
+   - **`destroy`**: Menghapus pesan secara permanen dari basis data.
 
-2. **AdminPengaturanController**
-   - **`index`**: Mengambil nilai data pengaturan kades (`nama_kepala_desa`, `nip_kepala_desa`, `ttd_kepala_desa`, `cap_desa`) dengan path URL storage yang siap dipakai frontend Inertia.js.
-   - **`update`**: Validasi input (nama, NIP, upload berkas PNG max 2MB). Menyimpan data identitas kades serta memproses berkas TTD & Cap yang diunggah ke storage `public`. Secara otomatis menghapus berkas lama jika diganti untuk efisiensi ruang server.
-   - **`hapusFile`**: Menghapus tanda tangan digital atau cap desa secara fisik dari storage dan memperbarui databasenya kembali menjadi `null`.
-
-3. **Routing di `routes/web.php`**
-   - Menghubungkan route `/admin/pengaturan` ke `AdminPengaturanController`.
-   - Menyediakan route GET (`index`), POST (`update`), dan DELETE (`hapusFile`).
+2. **Routing di `routes/web.php`**:
+   - Menghubungkan route `/operator/pesan` ke `OperatorPesanController` untuk index, show, dan destroy.
 
 ## Hasil yang Diharapkan
-- Admin memiliki kendali penuh atas identitas Kepala Desa, TTD digital, serta stempel resmi desa.
-- Data ini tersimpan dengan aman pada database dan folder storage lokal secara rapi.
+- Pesan dari masyarakat di halaman kontak publik masuk ke dashboard Operator dan terkelola secara efisien.
+- Status pesan terbaca terkelola secara otomatis sehingga memberikan akurasi data statistik pada dashboard.
