@@ -1,20 +1,18 @@
-# Issue: Pembuatan AdminOperatorController (Kelola Akun Operator)
+# Issue: Pembuatan OperatorPesanController (Kelola & Baca Pesan Kontak)
 
 ## Deskripsi Masalah / Kebutuhan
-Admin (Kepala Desa) memerlukan sebuah modul pengelolaan akun staf Operator desa untuk mendaftarkan operator baru, menonaktifkan akun sementara (jika berhalangan/cuti), mereset kata sandi jika lupa, serta menghapus akun secara permanen.
+Operator (staf desa) memerlukan modul kelola pesan masuk dari warga untuk melihat daftar aspirasi/kontak, membaca detail pesan, serta menghapus pesan yang tidak relevan atau bersifat spam. Sistem harus secara otomatis menandai pesan sebagai terbaca (`is_read = true`) ketika operator membuka rincian pesan tersebut.
 
 ## Rencana Implementasi
 
-1. **Membuat AdminOperatorController**:
-   - **`index`**: Menampilkan list seluruh akun user yang memiliki role `operator`, diurutkan berdasarkan tanggal pendaftaran terbaru.
-   - **`store`**: Membuat akun operator baru. Wajib mengisi `nama`, `username` (wajib unik di tabel `users`), dan `password` (enkripsi otomatis).
-   - **`toggleActive`**: Mengaktifkan atau menonaktifkan status akun operator (`is_active` status toggle).
-   - **`resetPassword`**: Reset password akun operator ke password default atau inputan baru.
-   - **`destroy`**: Menghapus akun operator secara permanen.
+1. **Membuat OperatorPesanController**:
+   - **`index`**: Menampilkan semua daftar pesan kontak masuk (paginated) diurutkan berdasarkan tanggal terbaru. Dilengkapi dengan filter pencarian dan filter status pesan (`sudah dibaca`/`belum dibaca`).
+   - **`show`**: Menampilkan rincian pesan. Ketika dibuka, sistem secara otomatis merubah status pesan `is_read = true` jika sebelumnya berstatus belum dibaca.
+   - **`destroy`**: Menghapus pesan secara permanen dari basis data.
 
 2. **Routing di `routes/web.php`**:
-   - Menghubungkan route `/admin/operator` ke `AdminOperatorController` untuk index, store, toggle, reset-password, dan destroy.
+   - Menghubungkan route `/operator/pesan` ke `OperatorPesanController` untuk index, show, dan destroy.
 
 ## Hasil yang Diharapkan
-- Admin memiliki kendali penuh atas hak akses staf operator desa.
-- Keamanan terjamin karena adanya validasi username unik serta kemudahan reset sandi langsung oleh Kepala Desa.
+- Pesan dari masyarakat di halaman kontak publik masuk ke dashboard Operator dan terkelola secara efisien.
+- Status pesan terbaca terkelola secara otomatis sehingga memberikan akurasi data statistik pada dashboard.

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminPengaturanController;
 use App\Http\Controllers\Admin\AdminStatistikController;
 use App\Http\Controllers\Operator\OperatorDashboardController;
 use App\Http\Controllers\Operator\OperatorBeritaController;
+use App\Http\Controllers\Operator\OperatorPesanController;
 use Inertia\Inertia;
 
 /*
@@ -163,16 +164,8 @@ Route::middleware(['auth', 'role:operator'])->prefix('operator')->name('operator
 
     // Kelola & Baca Pesan Kontak
     Route::prefix('pesan')->name('pesan.')->group(function () {
-        Route::get('/', function () {
-            return Inertia::render('Operator/Pesan/Index');
-        })->name('index');
-        
-        Route::get('/{id}', function ($id) {
-            return Inertia::render('Operator/Pesan/Show', ['id' => $id]);
-        })->name('show');
-        
-        Route::delete('/{id}', function ($id) {
-            return redirect()->route('operator.pesan.index')->with('success', 'Pesan berhasil dihapus.');
-        })->name('destroy');
+        Route::get('/', [OperatorPesanController::class, 'index'])->name('index');
+        Route::get('/{id}', [OperatorPesanController::class, 'show'])->name('show');
+        Route::delete('/{id}', [OperatorPesanController::class, 'destroy'])->name('destroy');
     });
 });
