@@ -47,15 +47,8 @@ class LayananController extends Controller
             'jenis_surat' => ['required', Rule::in(['domisili', 'usaha', 'tidak_mampu', 'pengantar'])],
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'nik' => ['required', 'string', 'size:16'],
-            'tempat_lahir' => ['required', 'string', 'max:100'],
-            'tanggal_lahir' => ['required', 'date'],
-            'jenis_kelamin' => ['required', Rule::in(['laki-laki', 'perempuan'])],
-            'agama' => ['required', 'string'],
-            'pekerjaan' => ['required', 'string'],
-            'alamat' => ['required', 'string'],
-            'no_hp' => ['required', 'string', 'max:20'],
+            'kontak' => ['required', 'string', 'max:20'],
             'keperluan' => ['required', 'string'],
-            'keterangan_tambahan' => ['nullable', 'string'],
         ];
 
         // Conditional validation jika jenis surat = usaha (SKU)
@@ -67,7 +60,24 @@ class LayananController extends Controller
             $rules['jenis_usaha'] = ['nullable'];
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+            'nik.required' => 'NIK wajib diisi.',
+            'nik.size' => 'NIK harus berukuran 16 karakter.',
+            'kontak.required' => 'Nomor telepon/WhatsApp wajib diisi.',
+            'keperluan.required' => 'Maksud keperluan surat wajib diisi.',
+            'nama_usaha.required' => 'Nama usaha wajib diisi untuk jenis surat usaha.',
+            'jenis_usaha.required' => 'Jenis usaha wajib diisi untuk jenis surat usaha.',
+        ]);
+
+        // Default empty required fields for migration compat
+        $validated['tempat_lahir'] = 'Pelalawan';
+        $validated['tanggal_lahir'] = now()->toDateString();
+        $validated['jenis_kelamin'] = 'laki-laki';
+        $validated['agama'] = 'Islam';
+        $validated['pekerjaan'] = 'Wiraswasta';
+        $validated['alamat'] = 'Desa Kemang';
+        $validated['no_hp'] = $validated['kontak'];
 
         // Generate nomor referensi otomatis
         $validated['nomor_referensi'] = $this->generateNomorReferensi($validated['jenis_surat']);
@@ -75,7 +85,6 @@ class LayananController extends Controller
 
         $pengajuan = PengajuanSurat::create($validated);
 
-        // Kirim response status dengan nomor referensi baru
         return redirect()->route('layanan-surat.status', ['ref' => $pengajuan->nomor_referensi])
             ->with('success', 'Pengajuan surat berhasil dikirim! Catat nomor referensi Anda.');
     }

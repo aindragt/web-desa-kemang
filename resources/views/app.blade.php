@@ -12,6 +12,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Lora:ital,wght@0,400..700;1,400..700&family=Inter:wght@400..700&display=swap" rel="stylesheet">
 
         <!-- Scripts & Styles -->
+        @routes
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @inertiaHead
     </head>
