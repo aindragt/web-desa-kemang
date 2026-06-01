@@ -33,7 +33,7 @@
 
         <div class="flex justify-center gap-4">
           <Link href="/layanan-surat">
-            <AppButton variant="secondary" size="lg">Ajukan Layanan Surat</Link>
+            <AppButton variant="secondary" size="lg">Ajukan Layanan Surat</AppButton>
           </Link>
           <Link href="/profil">
             <AppButton variant="ghost" size="lg" customClass="!bg-white/10 !text-white hover:!bg-white/20 !border-white/20">
