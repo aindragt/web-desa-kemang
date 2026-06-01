@@ -63,6 +63,16 @@ class OperatorBeritaController extends Controller
             'is_published' => ['required', 'boolean'],
             'fotos' => ['nullable', 'array'],
             'fotos.*' => ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'], // Maks 2MB
+        ], [
+            'judul.required' => 'Judul berita wajib diisi.',
+            'judul.max' => 'Judul berita maksimal 255 karakter.',
+            'kategori.required' => 'Kategori berita wajib dipilih.',
+            'ringkasan.required' => 'Ringkasan berita wajib diisi.',
+            'isi.required' => 'Isi berita wajib diisi.',
+            'is_published.required' => 'Status publikasi wajib ditentukan.',
+            'fotos.*.image' => 'File harus berupa gambar.',
+            'fotos.*.mimes' => 'Format gambar harus jpeg, png, jpg, gif, atau webp.',
+            'fotos.*.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
         $validated['penulis'] = Auth::user()->nama;
@@ -117,6 +127,16 @@ class OperatorBeritaController extends Controller
             'is_published' => ['required', 'boolean'],
             'fotos' => ['nullable', 'array'],
             'fotos.*' => ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+        ], [
+            'judul.required' => 'Judul berita wajib diisi.',
+            'judul.max' => 'Judul berita maksimal 255 karakter.',
+            'kategori.required' => 'Kategori berita wajib dipilih.',
+            'ringkasan.required' => 'Ringkasan berita wajib diisi.',
+            'isi.required' => 'Isi berita wajib diisi.',
+            'is_published.required' => 'Status publikasi wajib ditentukan.',
+            'fotos.*.image' => 'File harus berupa gambar.',
+            'fotos.*.mimes' => 'Format gambar harus jpeg, png, jpg, gif, atau webp.',
+            'fotos.*.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
         // Atur published_at jika status berubah menjadi published

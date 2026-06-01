@@ -49,6 +49,32 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'counters' => function () use ($request) {
+                if (!$request->user()) return null;
+
+                $user = $request->user();
+                $res = [
+                    'surat_pending' => 0,
+                    'ttd_cap_missing' => false,
+                    'berita_total' => 0,
+                    'pesan_unread' => 0,
+                ];
+
+                if ($user->role === 'admin') {
+                    $res['surat_pending'] = \App\Models\PengajuanSurat::waitingApproval()->count();
+                    
+                    $ttd = \App\Models\Pengaturan::getValue('ttd_kepala_desa');
+                    $cap = \App\Models\Pengaturan::getValue('cap_desa');
+                    $res['ttd_cap_missing'] = empty($ttd) || empty($cap);
+                } elseif ($user->role === 'operator') {
+                    // Operator counters
+                    $res['surat_pending'] = \App\Models\PengajuanSurat::whereIn('status', ['menunggu', 'diproses'])->count();
+                    $res['berita_total'] = \App\Models\Berita::count();
+                    $res['pesan_unread'] = \App\Models\PesanKontak::unread()->count();
+                }
+
+                return $res;
+            },
         ];
     }
 }
